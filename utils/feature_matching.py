@@ -9,7 +9,7 @@ def extract_sift_feature(image, eps=1e-6):
                           edgeThreshold=10, 
                           sigma=1.6)
     image_gray = cv.cvtColor(image, cv.COLOR_BGR2RGB)
-    keypoints, descriptors = sift.detecAndCompute(image_gray, mask=None)
+    keypoints, descriptors = sift.detectAndCompute(image_gray, mask=None)
     
     if len(keypoints) == 0:
         return ([], None)
