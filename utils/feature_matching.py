@@ -18,3 +18,10 @@ def extract_sift_feature(image, eps=1e-6):
     descriptors = np.sqrt(descriptors)
     
     return keypoints, descriptors
+
+
+def visualize_sift_feature(image, keypoints, name):
+    output_image = cv.drawKeypoints(image, keypoints, None)
+    
+    cv.imshow('image', output_image)
+    cv.imwrite(f"./data/detected_shift_feature_{name}.jpg", output_image)
