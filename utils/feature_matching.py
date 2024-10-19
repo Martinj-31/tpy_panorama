@@ -8,7 +8,7 @@ def extract_sift_feature(image, eps=1e-6):
                           contrastThreshold=0.04, 
                           edgeThreshold=10, 
                           sigma=1.6)
-    image_gray = cv.cvtColor(image, cv.COLOR_BRG2RGB)
+    image_gray = cv.cvtColor(image, cv.COLOR_BGR2RGB)
     keypoints, descriptors = sift.detecAndCompute(image_gray, mask=None)
     
     if len(keypoints) == 0:
