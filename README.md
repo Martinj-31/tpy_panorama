@@ -1,1 +1,1 @@
-# tpy_panorama
+# toy_panorama
