@@ -97,3 +97,53 @@ def distance_test(distances, indices, threshold):
             indices[i] = min_indices[i]
 
     return indices
+
+
+def ratio_test(distances, indices, threshold):
+    """ Check the ratio between the nearest distance and the second nearest distance
+    Args:
+        distances (numpy array): (N, M) contains the distances betweend descriptors
+        indices (numpy array): (N, ) contains matched indices, -1 = not matched
+        threshold (float): threshold to validate matched local features
+    Returns:
+        indices (numpy array): (N, ) contains matched indices, -1 = not matched
+    """
+    
+    for i in range(distances.shape[0]):
+        if indices[i] == -1:
+            continue
+
+        sorted_distances = np.sort(distances[i, :])
+
+        nearest = sorted_distances[0]
+        second_nearest = sorted_distances[1]
+
+        if second_nearest == 0:
+            ratio = 1
+        else:
+            ratio = nearest / second_nearest
+
+        if ratio > threshold:
+            indices[i] = -1
+    
+    return indices
+
+
+def consistency_test(distances, indices):
+    """ Check the consistency between matched local features
+    Args:
+        distances (numpy array): (N, M) contains the distances betweend descriptors
+        indices (numpy array): (N, ) contains matched indices, -1 = not matched
+    Returns:
+        indices (numpy array): (N, ) contains matched indices, -1 = not matched
+    """
+    reverse_indices = np.argmin(distances, axis=0)
+
+    for i in range(len(indices)):
+        if indices[i] == -1:
+            continue
+        
+        if reverse_indices[indices[i]] != i:
+            indices[i] = -1
+            
+    return indices
