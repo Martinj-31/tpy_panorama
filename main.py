@@ -1,7 +1,7 @@
 import argparse
 import cv2 as cv
 
-from utils.feature_matching import extract_sift_feature, visualize_sift_feature
+from utils.feature_matching import extract_sift_feature, visualize_sift_feature, match_features
 
 
 def get_config():
@@ -26,3 +26,7 @@ keypoints2, descriptors2 = extract_sift_feature(image2)
 
 visualize_sift_feature(image1, keypoints1, 'image1')
 visualize_sift_feature(image2, keypoints2, 'image2')
+
+# Match local features
+matches = match_features(keypoints1, descriptors1, keypoints2, descriptors2, args.distance_threshold, args.ratio_threshold)
+    
