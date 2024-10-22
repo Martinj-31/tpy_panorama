@@ -59,3 +59,21 @@ def match_features(
         matches.append([keypoints1[i].pt, keypoints2[j].pt])
 
     return matches
+
+
+def compute_distance(descriptors1, descriptors2):
+    """ Compute squared Euclidean the distances between descriptors
+    Args:
+        descriptors1 (numpy array): (N, D)
+        descriptors2 (numpy array): (M, D)
+    Returns:
+        distances (numpy array): (N, M)
+    """
+    d1_sum_of_squares = np.sum(np.square(descriptors1), axis=1).reshape(-1, 1)
+    d2_sum_of_squares = np.sum(np.square(descriptors2), axis=1).reshape(1, -1)
+
+    dot_products = np.dot(descriptors1, descriptors2.T)
+
+    distances = d1_sum_of_squares + d2_sum_of_squares - 2 * dot_products
+    
+    return distances
