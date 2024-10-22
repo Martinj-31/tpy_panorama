@@ -77,3 +77,23 @@ def compute_distance(descriptors1, descriptors2):
     distances = d1_sum_of_squares + d2_sum_of_squares - 2 * dot_products
     
     return distances
+
+
+def distance_test(distances, indices, threshold):
+    """ Check the nearest distance to find matched local features
+    Args:
+        distances (numpy array): (N, M) contains the distances betweend descriptors
+        indices (numpy array): (N, ) contains matched indices, -1 = not matched
+        threshold (float): threshold to find matched local features
+    Returns:
+        indices (numpy array): (N, ) contains matched indices, -1 = not matched
+    """
+
+    min_indices = np.argmin(distances, axis=1)
+    min_distances = distances[np.arange(distances.shape[0]), min_indices]
+
+    for i in range(len(min_distances)):
+        if min_distances[i] < threshold:
+            indices[i] = min_indices[i]
+
+    return indices
