@@ -90,3 +90,37 @@ def ransac(inputs, targets, num_samples, max_iterations=100, inlier_threshold=0.
         best_inliers = num_inliers
 
     return best_model
+
+
+def random_sample(inputs, targets, num_samples):
+    """ Randomly sample inputs and targets to determine model 
+    Args:
+        inputs (numpy array): (2K, 8) matrix
+        targets (numpy array): (2K, ) vector
+        num_samples (int): the number of random samples
+    Returns:
+        sampled_inputs (numpy array): (8, 8) matrix
+        sampled_targets (numpy array): (8, ) vector
+    """
+    num_matches = len(targets) // 2
+    indices = []
+    for i in random.sample(range(num_matches), num_samples):
+        indices.append(2 * i)
+        indices.append(2 * i + 1)
+    sampled_inputs = inputs[indices, :]
+    sampled_targets = targets[indices]
+    
+    return sampled_inputs, sampled_targets
+
+
+def fit_model(A, b, eps=1e-6):
+    """ Find the model x for Ax=b, x=A^{-1}b 
+    Args:
+        A (numpy array): (8, 8) matrix
+        b (numpy array): (8, ) vector
+    Returns:
+        x (numpy array): (8, ) vector, the solution for Ax=b
+    """
+    E = eps * np.eye(8)           # To avoid singular matrix
+    x = np.linalg.inv(A + E) @ b
+    return x
