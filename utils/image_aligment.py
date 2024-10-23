@@ -124,3 +124,39 @@ def fit_model(A, b, eps=1e-6):
     E = eps * np.eye(8)           # To avoid singular matrix
     x = np.linalg.inv(A + E) @ b
     return x
+
+
+def evaluate_model(inputs, targets, model, threshold):
+    """ Count the number of inliers of model x for Ax=b 
+    Args:
+        inputs (numpy array): (2K, 8) matrix A
+        outputs (numpy array): (2K, ) vector b
+        model (numpy array): (8, ) vector x
+        threshold (float): threshold to determine inlines
+    Returns:
+        num_inliers (int): the number of inliers
+    """
+    projected = np.dot(inputs, model)
+    errors = np.abs(projected - targets)
+    num_inliers = np.sum(errors < threshold)
+    
+    return num_inliers
+
+
+def refine_model(inputs, targets, model, threshold):
+    """ Perform least squares on the inliers of best model x to refine it
+        if the refined model is better than the current best model, replace it
+    Args:
+        inputs (numpy array): (2K, 8) matrix A
+        outputs (numpy array): (2K, ) vector b
+        model (numpy array): (8, ) vector x
+        threshold (float): threshold to determine inlines
+    Returns:
+        model (numpy array): (8, ) vector x
+    """
+    inlier_mask = np.abs(np.dot(inputs, model) - targets) < threshold
+    inlier_inputs = inputs[inlier_mask]
+    inlier_targets = targets[inlier_mask]
+    model, _, _, _ = np.linalg.lstsq(inlier_inputs, inlier_targets, rcond=None)
+        
+    return model
