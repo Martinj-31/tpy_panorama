@@ -1,7 +1,9 @@
 import argparse
 import cv2 as cv
+import numpy as np
 
 from utils.feature_matching import extract_sift_feature, visualize_sift_feature, match_features
+from utils.image_aligment import find_homography
 
 
 def get_config():
@@ -29,4 +31,8 @@ visualize_sift_feature(image2, keypoints2, 'image2')
 
 # Match local features
 matches = match_features(keypoints1, descriptors1, keypoints2, descriptors2, args.distance_threshold, args.ratio_threshold)
-    
+
+# Find homography
+H = find_homography(matches, args.num_samples, args.max_iterations, args.inlier_threshold, args.max_inliers_ratio)
+# 구한 homograpy를 warp_images에서 계산하기 편하도록 역행렬로 변환
+H = np.linalg.inv(H)
