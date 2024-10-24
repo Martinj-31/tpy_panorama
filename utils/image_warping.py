@@ -27,3 +27,32 @@ def find_parnorama_size(image1, image2, H):
     return xmax, xmin, ymax, ymin
 
 
+def backward_warp(image, warped_image, warped_mask, H):
+    """ Backward warp for images and masks
+    Args:
+        image (numpy array): (h1, w1, 3) source image
+        warped_image (numpy array): (h2, w2, 3) target image (to be filled)
+        warped mask (numpy array): (h2, w2) mask for target image (to be filled)
+        H (numpy array): (3, 3) matrix to perform geomtric transformation (image->warped_iamge)
+    Returns:
+        warped_image (numpy array): (h2, w2, 3) target image
+        warped_mask (numpy array): (h, w) mask for target image
+    """
+    h, w = warped_image.shape[:2]
+    
+    for y in range(h):
+        for x in range(w):
+            target_coords = np.array([x, y, 1])
+            source_coords = np.linalg.inv(H) @ target_coords
+            source_coords /= source_coords[2]
+            
+            sx, sy = int(source_coords[0]), int(source_coords[1])
+            
+            if 0 <= sx < image.shape[1] and 0 <= sy < image.shape[0]:
+
+                warped_image[y, x] = image[sy, sx]
+                warped_mask[y, x] = 1.0
+
+    return warped_image, warped_mask
+
+
