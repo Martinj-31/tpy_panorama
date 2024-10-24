@@ -27,6 +27,39 @@ def find_parnorama_size(image1, image2, H):
     return xmax, xmin, ymax, ymin
 
 
+def warp_images(image1, image2, H):
+    """ Warp image1 and image2
+    Args:
+        image1 (numpy array): (h1, w1, 3) target image
+        image2 (numpy array): (h2, w2, 3) source image
+        H (numpy array): (3, 3) matrix to perform geomtric transformation (image2 -> image1)
+    Returns:
+        xmax, xmin, ymax, ymin: the possible coordinates
+    """
+    # Find panorama size
+    xmax, xmin, ymax, ymin = find_parnorama_size(image1, image2, H)    
+
+    # Warp image1
+    h1, w1 = image1.shape[:2]
+    warped_image1 = np.zeros((ymax - ymin, xmax - xmin, 3))
+    warped_image1[-ymin:-ymin+h1, -xmin:-xmin+w1, :] = image1
+    warped_mask1 = np.zeros((ymax - ymin, xmax - xmin, 1))
+    warped_mask1[-ymin:-ymin+h1, -xmin:-xmin+w1, :] = 1.0
+
+    # Warp image2
+    T = np.array([[1, 0, -xmin], [0, 1, -ymin], [0, 0, 1]])
+    H = T @ H
+    warped_image2 = np.zeros((ymax - ymin, xmax - xmin, 3))
+    warped_mask2 = np.zeros((ymax - ymin, xmax - xmin, 1))
+    warped_image2, warped_mask2 = backward_warp(image2, warped_image2, warped_mask2, H)
+
+    # Distance transform
+    warped_dt1 = distance_transform(warped_mask1)
+    warped_dt2 = distance_transform(warped_mask2)
+
+    return warped_image1, warped_mask1, warped_dt1, warped_image2, warped_mask2, warped_dt2
+
+
 def backward_warp(image, warped_image, warped_mask, H):
     """ Backward warp for images and masks
     Args:
@@ -55,4 +88,8 @@ def backward_warp(image, warped_image, warped_mask, H):
 
     return warped_image, warped_mask
 
+
+def distance_transform(mask):
+    dt = cv.distanceTransform(mask.astype(np.uint8), distanceType=cv.DIST_L2, maskSize=5)
+    return dt
 
