@@ -4,6 +4,8 @@ import numpy as np
 
 from utils.feature_matching import extract_sift_feature, visualize_sift_feature, match_features
 from utils.image_aligment import find_homography
+from utils.image_warping import warp_images
+from utils.image_blending import binary_blending, alpha_blending, laplacian_pyramid_blending
 
 
 def get_config():
@@ -36,3 +38,16 @@ matches = match_features(keypoints1, descriptors1, keypoints2, descriptors2, arg
 H = find_homography(matches, args.num_samples, args.max_iterations, args.inlier_threshold, args.max_inliers_ratio)
 # 구한 homograpy를 warp_images에서 계산하기 편하도록 역행렬로 변환
 H = np.linalg.inv(H)
+
+# Warp images
+image1, mask1, dt1, image2, mask2, dt2 = warp_images(image1, image2, H)
+
+# Blend images
+binary_blended_image = binary_blending(image1, mask1, dt1, image2, mask2, dt2)
+cv.imwrite(args.binary_blending_path, binary_blended_image)
+
+alpha_blended_image = alpha_blending(image1, mask1, dt1, image2, mask2, dt2)
+cv.imwrite(args.alpha_blending_path, alpha_blended_image)
+
+laplacian_pyramid_blended_image = laplacian_pyramid_blending(image1, mask1, dt1, image2, mask2, dt2, args.num_levels)
+cv.imwrite(args.laplacian_pyramid_blending_path, laplacian_pyramid_blended_image)
