@@ -109,3 +109,44 @@ def laplacian_pyramid(gaussian_pyr):
         laplacian = np.subtract(gaussian_pyr[i-1], gaussian_expanded)
         laplacian_pyr.append(laplacian)
     return laplacian_pyr
+
+
+def blend(laplacian_pyr1, laplacian_pyr2, mask_pyr):
+    """ Blending laplacian pyramids based on mask pyramid
+    Args:
+        laplacian_pyr1 (list): laplacian pyramid 1
+        laplacian_pyr2 (list): laplacian pyramid 2
+        mask_pyr (list): blending mask pyramid
+    Returns:
+        blended_lapalacian_pyr (list): blended laplacian pyramid
+    """
+    blended_laplacian_pyr = []
+    for l1, l2, mask in zip(laplacian_pyr1, laplacian_pyr2, mask_pyr):
+        if len(mask.shape) == 2:
+            mask = np.repeat(mask[:, :, np.newaxis], 3, axis=2)
+            
+        l1 = l1.astype(np.float32)
+        l2 = l2.astype(np.float32)
+        mask = mask.astype(np.float32)
+        
+        blended = l1 * mask + l2 * (1.0 - mask)
+        blended_laplacian_pyr.append(blended)
+    
+    return blended_laplacian_pyr
+ 
+
+def reconstruct(laplacian_pyr):
+    """ Reconstruct the original image from lapalcian pyramid
+    Args:
+        laplacian_pyr (list): blended laplacian pyramid
+    Returns:
+        blended_image (numpy array): (h, w, 3) our destination!
+    """
+    blended_image = laplacian_pyr[0]
+
+    for i in range(1, len(laplacian_pyr)):
+        blended_image = cv.pyrUp(blended_image, dstsize=(laplacian_pyr[i].shape[1], laplacian_pyr[i].shape[0]))
+        blended_image = blended_image + laplacian_pyr[i]
+
+    
+    return blended_image
